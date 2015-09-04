@@ -1,0 +1,16 @@
+package CONTROL;
+
+import DATA.*;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//	CQADB cqadb = new CQADB("cqa");
+			//cqadb.selectDB("qa");
+		CQADB cqadb = new CQADB("hangman");
+		cqadb.selectDB2("a");
+		
+	}
+
+}
