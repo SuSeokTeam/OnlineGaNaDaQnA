@@ -35,9 +35,9 @@ public class CQADB {
 	}
 	
 	
-	public void selectDB(String question)
+	public ArrayList<QA> selectCQA()
 	{
-		System.out.println(question);
+		ArrayList<QA> cqaList = new ArrayList<QA>();
 		
 		try
 		{
@@ -45,15 +45,16 @@ public class CQADB {
 			rs = st.executeQuery(sql);
 			while(rs.next())
 			{
-				System.out.println(rs.getInt("number"));
-				System.out.println ( rs.getString("question"));
-				System.out.println(rs.getString("answer"));
+				QA qa = new QA(rs.getInt("number"), rs.getString("question"), rs.getString("answer"));
+				cqaList.add(qa);
 			}
 		}
 		catch(Exception e)
 		{
 			e.getStackTrace();
 		}
+		
+		return cqaList;
 	}
 	
 }

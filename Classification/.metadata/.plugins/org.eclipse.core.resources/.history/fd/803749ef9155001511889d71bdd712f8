@@ -1,0 +1,29 @@
+package DATA;
+
+public class QA {
+
+	String question;
+	String answer;
+	
+	public QA(String question, String answer)
+	{
+		this.question = question;
+		this.answer = answer;
+	}
+	public void setAnswer(String answer)
+	{
+		this.answer = answer;
+	}
+	public void setQuestion(String question)
+	{
+		this.question = question;
+	}
+	public String getQuestion()
+	{
+		return question;
+	}
+	public String getAnswer()
+	{
+		return answer;
+	}
+}
