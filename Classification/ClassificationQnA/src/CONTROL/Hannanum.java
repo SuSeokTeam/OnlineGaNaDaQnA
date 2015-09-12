@@ -21,8 +21,39 @@ import kr.ac.kaist.swrc.jhannanum.plugin.SupplementPlugin.PosProcessor.SimplePOS
 
 public class Hannanum {
 
+	Workflow hannanumWordflow;
+	
+	public Hannanum()
+	{
+		hannanumWordflow = new Workflow();
+		
+		try {
 
-	public static String getResult(String sentence)
+			hannanumWordflow.appendPlainTextProcessor(new SentenceSegmentor(), null);
+			hannanumWordflow.appendPlainTextProcessor(new InformalSentenceFilter(), null);
+			hannanumWordflow.setMorphAnalyzer(new ChartMorphAnalyzer(), "conf/plugin/MajorPlugin/MorphAnalyzer/ChartMorphAnalyzer.json");
+			hannanumWordflow.appendMorphemeProcessor(new UnknownProcessor(), null);
+			hannanumWordflow.setPosTagger(new HMMTagger(), "conf/plugin/MajorPlugin/PosTagger/HmmPosTagger.json");
+			hannanumWordflow.activateWorkflow(true);
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(0);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void closeWordFlow()
+	{
+		hannanumWordflow.close();
+	}
+	
+	public String getResult(String sentence)
 	{
 		String[] array = sentence.split("\n");
 		String result = "";
@@ -45,7 +76,7 @@ public class Hannanum {
 		return result;
 	}
 	
-	public static String extractVerb(String sentence)
+	public String extractVerb(String sentence)
 	{
 		
 		if(sentence.contains("/P"))
@@ -56,7 +87,7 @@ public class Hannanum {
 		return "";
 	}
 	
-	public static String extractNoun(String sentence)
+	public String extractNoun(String sentence)
 	{
 		
 		if(sentence.contains("/N"))
@@ -66,73 +97,19 @@ public class Hannanum {
 		}
 		return "";
 	}
-	
-	
-	public static void ManualWorkflowSetUp () {
-		Workflow workflow = new Workflow();
-		
-		try {
-			/* Setting up the work flow */
-			/* Phase1. Supplement Plug-in for analyzing the plain text */
-			workflow.appendPlainTextProcessor(new SentenceSegmentor(), null);
-			workflow.appendPlainTextProcessor(new InformalSentenceFilter(), null);
-			
-			workflow.setMorphAnalyzer(new ChartMorphAnalyzer(), "conf/plugin/MajorPlugin/MorphAnalyzer/ChartMorphAnalyzer.json");
-			workflow.appendMorphemeProcessor(new UnknownProcessor(), null);
 
-			workflow.setPosTagger(new HMMTagger(), "conf/plugin/MajorPlugin/PosTagger/HmmPosTagger.json");
-			
-
-			workflow.activateWorkflow(true);
-		
-			String document = "3.5% 증가하였다.를 읽을 때, 퍼센트라고 하든, 프로라고 하든 상관없나요?";
-			
-			workflow.analyze(document);
-			System.out.println(workflow.getResultOfDocument());
-			
-			workflow.close();
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.exit(0);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		/* Shutdown the workflow */
-		workflow.close();  	
-	}
 	
-	public static void main(String[] args) 
+	public void setSetting()
 	{
-
-/*		Workflow workflow = WorkflowFactory.getPredefinedWorkflow(WorkflowFactory.WORKFLOW_POS_SIMPLE_09);
 		
-		try {
-			workflow.activateWorkflow(true);
-
-			String document = "Francis Fukuyama 라는 인명을 프랜시스 푸쿠야마가 아닌, 프랜시스 후쿠야마로 쓰는 이유가 궁금합니다.";
-			
-			workflow.analyze(document);
-			
-			System.out.println(workflow.getResultOfDocument());
-			String tmp = getResult(workflow.getResultOfDocument());
-			
-			System.out.println(extractVerb(tmp));
-
-			workflow.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		
-		workflow.close();  	
-	*/
-		
-		ManualWorkflowSetUp();
 	}
+	
+	public void ManualWorkflowSetUp (String sentence) {
+	
+		hannanumWordflow.analyze(sentence);
+		System.out.println(hannanumWordflow.getResultOfDocument());
+			
+	}
+	
+
 }

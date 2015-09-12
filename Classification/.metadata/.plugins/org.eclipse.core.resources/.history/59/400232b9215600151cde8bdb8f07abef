@@ -1,0 +1,31 @@
+package CONTROL;
+
+import java.util.ArrayList;
+
+import DATA.*;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		CQADB cqadb = new CQADB("cqa");
+		ArrayList<QA> qaList = cqadb.selectCQA();
+		
+		Classifier cf = new Classifier();
+		
+		try {
+			cf.parseJosa();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		for(int i=0 ; i<qaList.size() ; i++)
+		{
+			QA qa = qaList.get(i);
+			cf.extractKeyword(qa.getQuestion(), qa.getAnswer());
+			System.out.println();
+		}
+		
+	}
+
+}

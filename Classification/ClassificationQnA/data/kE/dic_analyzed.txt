@@ -1,4 +1,4 @@
-가	가/jcs
+﻿가	가/jcs
 가는	가/pvg+는/etm
 가득	가득/mag
 가서	가/pvg+서/ecs

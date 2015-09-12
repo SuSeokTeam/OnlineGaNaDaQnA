@@ -53,7 +53,6 @@ public class Classifier {
 	 		System.out.println(keyname + " : " + value);
 	 	}
 	}
-	
 
 	public void getWordDictionary2(String sentence)
 	{
@@ -235,58 +234,58 @@ public class Classifier {
 	 	}
 	}
 	
+	//char의 index 빈도수를 나타냄
 	public ArrayList<WordChar> getWordCharList(String sentence)
 	{
 		ArrayList<WordChar> wordcharList = new ArrayList<WordChar>();
 			
-			for(int i=0; i<sentence.length(); i++)
+		for(int i=0; i<sentence.length(); i++)
+		{
+			char word = sentence.charAt(i);
+			int index =  findWord(word, wordcharList);
+		
+			if(word == ' ')
 			{
-				char word = sentence.charAt(i);
-				int index =  findWord(word, wordcharList);
-			
-				if(word == ' ')
-				{
-					continue;
-				}
-				else if(index == -1)
-				{
-					WordChar wc = new WordChar();
-					wc.setWord(word);
-					wc.putIndex(i);
-					wordcharList.add(wc);
-				}
-				else
-				{
-					WordChar wc = wordcharList.get(index);
-					wc.putIndex(i);
-				}
+				continue;
 			}
-			
-			
-	/*		for(int i= 0; i<wordcharList.size(); i++)
+			else if(index == -1)
 			{
-				WordChar wc = wordcharList.get(i);
-				
-				System.out.print(wc.getWord() + " : ");
-				
-				ArrayList<Integer> wclist = wc.getIndexList();
-				
-				for(int j=0; j<wclist.size();j++)
-				{
-					System.out.print(wclist.get(j) + " ");
-				}
-				System.out.println();
-			}*/
+				WordChar wc = new WordChar();
+				wc.setWord(word);
+				wc.putIndex(i);
+				wordcharList.add(wc);
+			}
+			else
+			{
+				WordChar wc = wordcharList.get(index);
+				wc.putIndex(i);
+			}
+		}
 			
+	/*	for(int i=0; i<wordcharList.size(); i++)
+		{
+			WordChar wc = wordcharList.get(i);
+			System.out.print(wc.getWord()  + " : " );
+			
+			ArrayList<Integer> intList =  wc.getIndexList();
+			
+			for(int j=0 ;j<intList.size(); j++)
+			{
+				System.out.print(intList.get(j) + " ");
+			}
+			System.out.println();
+		}
+		*/
+		
 		return wordcharList;
 	}
 	
-
+	//띄어쓰기로 분리하여 조사제거
 	public ArrayList<String> splitSpace(String sentence)
 	{
 		String[] arr = sentence.split(" ");
 		ArrayList<String> frequencyWordList = new ArrayList<String>();
-		String word = "";
+		/*	String word = "";
 		char c;
 		String punctuation[] = {"(", "[" , ")", " ]" ,"{" , "}","'","\"",",","."};
 		//punctuation
@@ -304,8 +303,7 @@ public class Classifier {
 	 			{
 	 				int index = word.indexOf(punc);
 	 				msg =  word.substring(0, index);
-	 				
-	 				break;
+	 				frequencyWordList.add(msg);
 	 			}
 			}
 			if(msg.length() != 0)
@@ -314,7 +312,13 @@ public class Classifier {
 				frequencyWordList.add(msg);
 			}
 		}
-	//	System.out.println("=====");
+	//	System.out.println("=====");*/
+		
+		for(int i=0; i<arr.length; i++)
+		{
+			frequencyWordList.add(arr[i]);
+		}
+		
 		return frequencyWordList;
 	}
 	
@@ -329,13 +333,24 @@ public class Classifier {
 		ArrayList<String> removalJosaQList =  removeJosa(frequencyQList);
 		
 		ArrayList<String> frequencyAList = splitSpace(answer);
-		ArrayList<String> removalJosaAList = removeJosa(frequencyAList);
+	//	ArrayList<String> removalJosaAList = removeJosa(frequencyAList);
 		
-		compareToAnswer(removalJosaQList, removalJosaAList);
+		compareToAnswer(removalJosaQList, frequencyAList);
 	}
 	
 
+	public void getClassify( ArrayList<WordChar> questionList , ArrayList<String> frequencyQList)
+	{
+		WordChar wc;
+		for(int i=0 ;i< questionList.size(); i++)
+		{
+			wc = questionList.get(i);
+			
+			
+		}
+	}
 	
+	//질문과 담변을 비교하는 것
 	public void compareToAnswer(ArrayList<String> removalJosaQList, ArrayList<String> removalJosaAList)
 	{
 		HashMap<String, Integer> hashmap = new HashMap<String, Integer>();
@@ -344,8 +359,27 @@ public class Classifier {
 	 	{
 	 		String answer = removalJosaAList.get(i);
 	 		
+	 		for(int j=0; j<removalJosaQList.size(); j++)
+	 		{
+	 			String question = removalJosaQList.get(j);
+	 			
+	 			if(answer.contains(question))
+	 			{
+	 				if(question.length() > 0 && !question.equals(" "))
+	 				{
+	 				
+	 				if(!hashmap.containsKey(question))
+		 				hashmap.put(question, 1);
+		 			else
+		 			{
+		 				int key = hashmap.get(question);
+		 				hashmap.replace(question, key+1);
+		 			}
+	 				}
+	 			}
+	 		}
 	 		
-	 		if(removalJosaQList.contains(answer))
+	 	/*	if(removalJosaQList.contains(answer))
 	 		{
 	 			if(!hashmap.containsKey(answer))
 	 				hashmap.put(answer, 1);
@@ -355,7 +389,7 @@ public class Classifier {
 	 				hashmap.replace(answer, key+1);
 	 			}
 	 				
-	 		} 		
+	 		} 	*/	
 	 	}
 	 
 	 	
@@ -371,6 +405,7 @@ public class Classifier {
 	 	}
 	}
 	
+	//단어의 리스트 중에서 끝에 조사가 포함이 되는 것
 	public ArrayList<String> removeJosa(ArrayList<String> frequencyWordList)
 	{
 		String temp = "";
@@ -414,9 +449,9 @@ public class Classifier {
 		return removalJosaList;
 	}
 	
+	//wordcharList의 빈도수가 2이상인 char을 setnece의 어절로 분리된 단어에 포함되는 것
 	public ArrayList<String> frequencyWord(ArrayList<WordChar> wordcharList, String sentence)
 	{
-		
 		String[] arr = sentence.split(" ");
 		ArrayList<String> frequencyWordList = new ArrayList<String>();
 		

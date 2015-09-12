@@ -1,0 +1,8 @@
+package DATA;
+
+public class Morph {
+
+	private String MorphName;
+	private String tag;
+	
+}
