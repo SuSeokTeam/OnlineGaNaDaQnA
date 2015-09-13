@@ -16,16 +16,20 @@
 <fullyQualifiedTypeName name="java.io.FileInputStream"/>
 <fullyQualifiedTypeName name="java.io.InputStreamReader"/>
 <fullyQualifiedTypeName name="kr.kaist.ir.korean.parser.Parser"/>
-<fullyQualifiedTypeName name="kr.kaist.ir.korean.parser.IntegratedParser"/>
 <fullyQualifiedTypeName name="kr.kaist.ir.korean.data.TaggedSentence"/>
-<fullyQualifiedTypeName name="kr.kaist.ir.korean.data.TaggedMorpheme"/>
-<fullyQualifiedTypeName name="java.util.LinkedList"/>
-<fullyQualifiedTypeName name="java.lang.System"/>
 <fullyQualifiedTypeName name="javax.security.auth.login.Configuration"/>
 <fullyQualifiedTypeName name="kr.kaist.ir.korean.data.ConflictedWord"/>
-<fullyQualifiedTypeName name="kr.kaist.ir.korean.data.TaggedWord"/>
 <fullyQualifiedTypeName name="DATA.Word"/>
 <fullyQualifiedTypeName name="DATA.Morph"/>
-<fullyQualifiedTypeName name="DATA.Dependent"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="kr.kaist.ir.korean.parser.IntegratedParser"/>
+<fullyQualifiedTypeName name="CONTROL.Hannanum"/>
+<fullyQualifiedTypeName name="kr.kaist.ir.korean.parser.HannanumParser"/>
+<fullyQualifiedTypeName name="kr.kaist.ir.korean.parser.KkokkomaParser"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="DATA.Dependent"/>
+<fullyQualifiedTypeName name="java.util.LinkedList"/>
+<fullyQualifiedTypeName name="kr.kaist.ir.korean.data.TaggedWord"/>
+<fullyQualifiedTypeName name="kr.kaist.ir.korean.data.TaggedMorpheme"/>
+<fullyQualifiedTypeName name="java.util.Stack"/>
 </qualifiedTypeNameHistroy>

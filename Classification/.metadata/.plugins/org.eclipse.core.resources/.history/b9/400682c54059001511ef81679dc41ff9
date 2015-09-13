@@ -1,0 +1,69 @@
+package CONTROL;
+
+import java.util.ArrayList;
+
+import DATA.*;
+
+public class Main {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		CQADB cqadb = new CQADB("cqa");
+		ArrayList<QA> qaList = cqadb.selectCQA();
+		//Hannanum hn = new Hannanum();
+	//	Classifier cf = new Classifier();
+		
+		/*
+		try {
+			cf.parseJosa();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}*/
+		qaList.size();
+		ExtractKeyword ek = new ExtractKeyword();
+		String sentence  = "외국어 지명에 띄어쓰기가 되어 있을 경우, 국어 표기에서는 띄어쓰기를 적용해야 하나요? 예전 질의를 보면 가령 로스앤젤레스와 로스 앤젤레스의 경우에는 널리 쓰이는 대로 전자를 쓰는 게 맞는 듯한데, 그렇다면 모든 경우에 외래어 지명을 붙여 써야 하나요? 가령 산티아고 데 콤포스텔라와 산티아고데콤포스텔라처럼요";
+		
+		for(int i=0 ; i<2; i++)
+		{
+			QA qa = qaList.get(i);
+			
+			ek.getDependent(sentence);
+	//		hn.ManualWorkflowSetUp(qa.getQuestion());
+			System.out.println();
+		}
+	//	cf.extractKeyword("학창시절, 학창 시절 중 띄어쓰기는 어떤 게 맞나요?", "학창과 시절은 각각의 단어이므로, 학창 시절과 같이 띄어 적는 것이 맞습니다.");
+		
+		/*ExtractKeyword ek = new ExtractKeyword();
+		try {
+			ek.parseJosa();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		for(int i=0 ; i<qaList.size() ; i++)
+		{
+			QA qa = qaList.get(i);
+			System.out.println("Q : " + qa.getQuestion());
+			System.out.println("A : " + qa.getAnswer());
+			
+			System.out.println("Q : " + ek.setSpace(qa.getQuestion()));
+			System.out.println("A : " + ek.setSpace(qa.getAnswer()));
+		//	ek.splitSpace(qa.getQuestion());
+		//	ek.splitSpace( qa.getAnswer());
+			System.out.println();
+		}
+		*/
+		
+		
+//		String sentence  = "서울에 간다와 서울로 간다의 에와 로의 차이점이 뭔가요?";
+		
+		
+		
+		//	sentence = ek.RemoveSpace(sentence);
+	//	ek.parseKorean(sentence);
+		//System.out.println(ek.RemoveSpace(sentence));
+		
+	}
+
+}

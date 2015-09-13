@@ -5,9 +5,11 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Stack;
 
 import javax.security.auth.login.Configuration;
 
+import DATA.CQADB;
 import DATA.Dependent;
 import DATA.Morph;
 import DATA.Word;
@@ -15,15 +17,25 @@ import kr.kaist.ir.korean.data.ConflictedWord;
 import kr.kaist.ir.korean.data.TaggedMorpheme;
 import kr.kaist.ir.korean.data.TaggedSentence;
 import kr.kaist.ir.korean.data.TaggedWord;
+import kr.kaist.ir.korean.parser.HannanumParser;
 import kr.kaist.ir.korean.parser.IntegratedParser;
+import kr.kaist.ir.korean.parser.KkokkomaParser;
 import kr.kaist.ir.korean.parser.Parser;
 
 public class ExtractKeyword {
 	
-	ArrayList<String> sentenList;
-	ArrayList<ArrayList<Word>> classfier = new ArrayList<ArrayList<Word>>();
-	
+	ArrayList<ArrayList<TaggedWord>> classfier = new ArrayList<ArrayList<TaggedWord>>();
 	ArrayList<String> josaList = new ArrayList<String>();
+	ArrayList<TaggedMorpheme> keyword = new ArrayList<TaggedMorpheme>();
+	CQADB cqadb = null;
+//	ArrayList<String> sentenceList = new ArrayList<String>();
+	KkokkomaParser iParser;
+	
+	public ExtractKeyword(CQADB cqadb)
+	{
+		this.cqadb = cqadb;
+		iParser = new KkokkomaParser();
+	}
 	
 	public void parseJosa() throws Exception
 	{
@@ -82,21 +94,10 @@ public class ExtractKeyword {
 		fileInputStream.close();
 	}
 	
-	public String setSpace(String sentence)
-	{
-		ArrayList<String> removalSentence = new ArrayList<String>();
-		char c;
-	//	char punctuation[] = {'(', '[' , ')', ']' ,'{' , '}', '\'', ',' , '.' ,'?'};
-		String punctuation[] = {"(", "[" , ")", " ]" ,"{" , "}","'","\"",",",".", "?"};
-		String temp = sentence;
 	
-		for(int j=0; j<punctuation.length; j++)
-		{
-			temp.replace(punctuation[j], " ");
-		}
-		
-		System.out.println(temp);
-		return temp;
+	public void clear()
+	{
+		classfier.clear();
 	}
 	
 	public ArrayList<String> splitSpace(String sentence)
@@ -136,61 +137,297 @@ public class ExtractKeyword {
 		return frequencyWordList;
 	}
 
-	public String RemoveSpace(String sentence)
+	public void getString()
 	{
-		sentence = sentence.replaceAll("\\s", ""); 
-		
-		return sentence;
-	}
-	
-	public void splitComma(String sentnece)
-	{
-		System.out.println(sentnece);
-		sentenList = new ArrayList<String>();
-		String[] sentenceList =  sentnece.split(".");
-		
-		for(int i=0; i<sentenceList.length; i++)
-		{
-			String sen =  sentenceList[i];
-			sentenList.add(sen);
-			System.out.println(sen);
+	//	Parser iParser = null;
+		try {
+			Parser iParser = new IntegratedParser();
+			TaggedSentence s = iParser.dependencyOf("학창시절, 학창 시절 중 띄어쓰기는 어떤 게 맞나요?");
+			System.out.println(s.toString());
+			//hp = new HannanumParser();
+			//hp.dependencyOf(arg0)
+			
+			iParser = new IntegratedParser();
+			s = iParser.dependencyOf("맑다의 발음이 뭔가요?");
+			System.out.println(s.toString());
+			
+			KkokkomaParser iParser3 = new KkokkomaParser();
+			s = iParser3.dependencyOf("학창시절, 학창 시절 중 띄어쓰기는 어떤 게 맞나요?");
+			System.out.println(s.toString());
+			
+			HannanumParser iParser4 = new HannanumParser();
+			s = iParser4.dependencyOf("학창시절, 학창 시절 중 띄어쓰기는 어떤 게 맞나요?");
+			System.out.println(s.toString());
+			
+			System.out.println("**");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
-	public void getDependent(String sentence)
+	public boolean findTaggedWord(TaggedWord tw, ArrayList<TaggedWord> tagList)
 	{
-		Parser iParser = null;
-		ArrayList<Word> wordList = new ArrayList<Word>();
+		for(TaggedWord t: tagList)
+		{
+			if(t.getOriginalWord().equals(tw.getOriginalWord()))
+			{
+				return true;
+			}
+		}
 		
-		sentenList = new ArrayList<String>();
+		return false;
+	}
+	
+	public void extractKeyword(String sentence, int cqaNum)
+	{
+	
+		ArrayList<String> sentenList = new ArrayList<String>();
 		sentenList.add(sentence);
 		
 		try
 		{
-			iParser = new IntegratedParser();
+			String nextSentence = null;
+	
+			for(int i=0 ; i<sentenList.size(); i++)
+			{
+				iParser = new KkokkomaParser();
+				
+				nextSentence = sentenList.get(i);
+				System.out.println(nextSentence);
+				TaggedSentence s = iParser.dependencyOf(new String(nextSentence));
+				
+				for(int j=0 ;j<s.size(); j++)
+				{
+					TaggedWord w = s.getWordAt(j);
+					System.out.print(w.getOriginalWord() + " : " );
+					
+					
+					LinkedList<TaggedWord> listWord= w.getDependents();
+					
+					for(TaggedWord tw : listWord)
+					{
+						if(findTaggedWord(tw, classfier.get(classfier.size()-1)))
+						{
+							ArrayList<TaggedWord> tagwordList2 = classfier.get(classfier.size()-1);
+							tagwordList2.add(w);
+							classfier.set(classfier.size()-1, tagwordList2);
+						}
+						
+						System.out.print(tw.getOriginalWord() + " , " );
+					}
+					
+					if(listWord.size() < 1)
+					{
+						ArrayList<TaggedWord> tagwordList2 = new ArrayList<TaggedWord>();
+						tagwordList2.add(w);
+						classfier.add(tagwordList2);
+					}
+					
+					System.out.println();
+				}
+				
+				String lastWord = s.getOriginalString(null);
+				
+				int index = -1;
+				
+				if(!nextSentence.equals(lastWord))
+				{
+					index = nextSentence.indexOf(lastWord);
+					index += lastWord.length();
+					
+					if(index+1 <= nextSentence.length())
+					{
+						String newString = nextSentence.substring(index+1, nextSentence.length());
+						sentenList.add(newString);
+						try {
+						      Thread.sleep(1 * 300);
+						    } catch (InterruptedException e) {
+						    	
+						    }
+							
+					}
+					
+				}
+				System.out.println();
+			}
+			printClassfiy();
+			getKeyword();
+			clear();
+			printKeyword();
+			insertDB(cqaNum);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+		
+	}
+	
+	public void insertDB(int cqaNum)
+	{
+		boolean check = false;
+		String k = null;
+		boolean check2 = false;
+		int num =0;
+		for(TaggedMorpheme key : keyword)
+		{
+			k = key.getMorpheme();
+			check = cqadb.findKeyword(k);
+			if(check)
+			{
+				check2 = cqadb.findDependent(k, cqaNum);
+				if(!check2)
+				{
+					cqadb.insertDependent(k, cqaNum);
+					num = cqadb.selectTF(k) + 1;
+					cqadb.updateTF(k, num);
+				}
+				
+			}
+			else
+			{
+				cqadb.insertKeyword(k);
+				cqadb.insertDependent(k, cqaNum);
+			}
+			
+			System.out.println(key.toString());
+		}
+		
+	}
+	
+	public void getKeyword()
+	{
+		Stack<TaggedMorpheme> tagedStack = new Stack<TaggedMorpheme>();
+		keyword = new ArrayList<TaggedMorpheme>();
+		
+		for(ArrayList<TaggedWord> twList : classfier)
+		{
+		//	System.out.print("class " + i + " : ");
+			for(int i=0 ;i< twList.size(); i++)
+			{
+				TaggedWord t = twList.get(i);
+				//System.out.println(t.getOriginalWord());
+				
+				for(int j=0; j<t.size(); j++)
+				{
+					TaggedMorpheme tm = t.getMorphemeAt(j);
+				//	System.out.println(tm.getMorpheme());
+					
+					
+					if(tm.getTag().charAt(0)== 'J')
+					{
+						for(;;)
+						{
+							if(tagedStack.isEmpty())
+								break;
+							TaggedMorpheme tmp = tagedStack.pop();
+							keyword.add(tmp);
+						}
+					}
+					else
+						tagedStack.add(tm);
+				}
+				
+			}
+			tagedStack.removeAllElements();
+		//	System.out.println();
+		//	i++;
+		}
+	}
+	
+	public void printClassfiy()
+	{
+		int i =1;
+		for(ArrayList<TaggedWord> twList : classfier)
+		{
+			System.out.print("class " + i + " : ");
+			for(TaggedWord t : twList)
+			{
+				System.out.print(t.getOriginalWord() + " , ");
+			}
+			System.out.println();
+			i++;
+		}
+	}
+	
+	public void printKeyword()
+	{
+		System.out.println("============");
+		for(TaggedMorpheme key : keyword)
+		{
+			System.out.print(key.toString() + " , ");
+		}
+		System.out.println();
+	}
+	
+	public void getDependent(String sentence)
+	{
+	//	Parser iParser = null;
+		ArrayList<Word> wordList = new ArrayList<Word>();
+		
+		ArrayList<String> sentenList = new ArrayList<String>();
+		sentenList.add(sentence);
+		
+		try
+		{
+		//	Parser iParser = new IntegratedParser();
+		//	TaggedSentence s = null;
+			String nextSentence = null;
+			int lastIndex = -1;
+			int firstIndex = 0;
+			String prevSentence = null;
 			
 			for(int i=0 ; i<sentenList.size(); i++)
 			{
-				TaggedSentence s = iParser.dependencyOf(sentenList.get(i));
-	//			System.out.println(s.size() + "          " );
-	//			System.out.println(s + "\n=============");
+		//		HannanumParser iParser = new HannanumParser();
+		//		KkokkomaParser iParser = new KkokkomaParser();
+				Parser iParser = new IntegratedParser();
 				
-				for(TaggedWord tw : s)
+				nextSentence = sentenList.get(i);
+				System.out.println(nextSentence);
+				TaggedSentence s = iParser.dependencyOf(new String(nextSentence));
+				
+				for(int j=0; j<s.size(); j++)
 				{
-			//		System.out.println(tw.getOriginalWord());
-			//		System.out.println(tw.getTag());
+					TaggedWord tw = s.getWordAt(j);
+				//	System.out.println("========");	
 					System.out.println(tw.toString());
 					Word word = parserResult(tw.toString());
-					printWord(word);
+			//		printWord(word);
 					wordList.add(word);
-					System.out.println("========");
-					
+					System.out.println("========");	
 				}
+				
+				
+		//		classifyResult(wordList);
+		//		printWordList();
+			
+				
+				String lastSentence = s.getLast().getOriginalWord();
+				if(sentence.equals(lastSentence))
+				{
+					break;
+				}
+				else
+				{
+				//	sentence.las
+					lastIndex = sentence.lastIndexOf(lastSentence);
+					lastIndex += lastSentence.length();
+					
+					if(lastIndex != -1 && nextSentence.length() >= lastIndex)
+					{
+						prevSentence = sentence.substring(lastIndex, nextSentence.length());
+						firstIndex = lastIndex+1;
+						sentenList.add(prevSentence);
+					}
+				}
+				wordList.clear();
 				s.clear();
-				classifyResult(wordList);
-				printWordList();
+		//		close();
 			}
-		
+			
+			
 		}
 		catch(Exception e)
 		{
@@ -198,103 +435,9 @@ public class ExtractKeyword {
 		}
 	}
 	
-	public void classifyResult(ArrayList<Word> wordList)
-	{
-		String superWordName = null;
-		ArrayList<Dependent> dpentList = null;
-		ArrayList<String> depNameList = null;
-		ArrayList<Word> candiWord = null;
-		String superName = "";
-		boolean isContain = false;
-		System.out.println("++++++++++++++++");
-		String wordname = "";
-		
-		for(Word w : wordList)
-		{
-			
-			dpentList = w.getDepentWord();
-			wordname = w.getWordName();
-			
-			
-			if(dpentList.size() == 0)
-			{
-				candiWord = new ArrayList<Word>();
-				candiWord.add(w);
-				classfier.add(candiWord);
-			}
-			for(int i=0 ; i<dpentList.size(); i++)
-			{
-				Dependent d = dpentList.get(i);
-				depNameList = d.getDependentName();
-				superName = d.getSuperWordName();
-				System.out.print(superName  + " : " );
-				
-				
-				if(depNameList.size() == 0 )
-				{
-					if(i+1 <dpentList.size())
-						continue;
-					candiWord = new ArrayList<Word>();
-					candiWord.add(w);
-					classfier.add(candiWord);
-					break;
-				}
-				
-				for(int j=0 ;j<depNameList.size(); j++)
-				{ 
-					String name = depNameList.get(j);
-					
-					for(Word wd : candiWord)
-					{
-						if(wd.getWordName().contains(name))
-						{
-							isContain = true;
-							candiWord.add(w);
-							break;
-						}
-					}
-					if(isContain)
-					{
-						break;
-					}
-					if(isContain ==  false && !wordname.contains(name))
-					{
-						//classfier.add(candiWord);
-						if(j+1 <depNameList.size())
-							continue;
-						candiWord = new ArrayList<Word>();
-						classfier.add(candiWord);
-						candiWord.add(w);
-						break;
-					}
-					
-					System.out.print(name);
-				}
-				isContain = false;
-				System.out.println();
-			}
-		}
-//		classfier.add(candiWord);
-		System.out.println("++++++++++++++++");
-	}
-
-	public void printWordList()
-	{
-		System.out.println("**************");
-		
-		for(int i =0; i< classfier.size(); i++)
-		{
-			ArrayList<Word> wordList = classfier.get(i);
-			System.out.println(i + " 번째 class");
-			for(Word w : wordList)
-			{
-				System.out.print(w.getWordName() + " ");
-			}
-			System.out.println();
-		}
-		System.out.println("***************");
-	}
 	
+	
+
 	public Word parserResult(String result)
 	{
 		ArrayList<String> resultList = new ArrayList<String>();
@@ -318,7 +461,7 @@ public class ExtractKeyword {
 		}*/
 	//	System.out.println("========");
 		boolean check = false;
-		String splitPro[] = {"(","/",")","=",":","^"};
+		String splitPro[] = {"(","/",")","=",":","^","+","-"};
 		int leftcount = 0;
 		int rightcount = 0;
 		int tmp1 = -1;
@@ -358,6 +501,10 @@ public class ExtractKeyword {
 					}
 					rightcount++;
 				}
+				else if(a == ' ')
+				{
+					
+				}
 				else
 				{
 					if(leftcount > rightcount + 1)
@@ -388,11 +535,11 @@ public class ExtractKeyword {
 			finalList.add(msg);
 		}
 		
-		for(int i=0 ;i<finalList.size();i++)
+	/*	for(int i=0 ;i<finalList.size();i++)
 		{
 			System.out.println(finalList.get(i));
 		}
-		
+		*/
 		boolean isdepent = false;
 		Word word = new Word();
 
@@ -477,133 +624,5 @@ public class ExtractKeyword {
 		return word;
 		
 	}
-	public void printWord(Word word)
-	{
-		System.out.println(word.getWordName());
-		ArrayList<Dependent> dpList = word.getDepentWord();
-		try
-		{
-			if(dpList.size() > 0)
-			{
-				for(Dependent dp : dpList)
-				{
-					System.out.println("지배자 : " + dp.getSuperWordName());
-					ArrayList<String> dpnameList = dp.getDependentName();
-					for(String s : dpnameList)
-					{
-						System.out.println("\t" + s);
-					}
-					
-				}
-			}
-		}
-		catch(Exception e)
-		{
-			e.getStackTrace();
-		}
-		
-	}
-
-	public void parseKorean(String sentence)
-	{
-		Parser iParser = null;
-
-		sentenList = new ArrayList<String>();
-		sentenList.add(sentence);
-		try
-		{
-			iParser = new IntegratedParser();
 	
-			for(int i = 0; i< sentenList.size(); i++)
-			{
-				TaggedSentence s = iParser.dependencyOf(sentenList.get(i));
-				System.out.println(s.toString());
-				for(int j=0; j<s.size(); j++)
-				{
-					TaggedWord w = s.getWordAt(j);
-					LinkedList<TaggedWord> dependents =  w.getDependents();
-					
-					System.out.print(w.getOriginalWord());
-					System.out.print(" : ");
-					System.out.print(w.getTag());
-					System.out.print(" : ");
-					System.out.print(w.getRawTag());
-					System.out.println();
-					
-				//	if(dependents.size() > 0)
-					//{
-						System.out.println("[의존사]");
-						
-						for(TaggedWord dp : dependents)
-						{
-					//		LinkedList<TaggedWord> dependentsDp = dp.getDependents();
-					/*		for(TaggedMorpheme m : dp)
-							{
-								System.out.println(m.toString());
-								System.out.println(m.getMorpheme());
-							}*/
-							System.out.print( "\t" + dp.getOriginalWord());
-							System.out.print(" : ");
-							System.out.print(dp.getTag());
-							System.out.print(" : ");
-							System.out.print(dp.getRawTag());
-							System.out.println();
-							System.out.println(dp.toString());
-							LinkedList<TaggedWord> dependentsDp = dp.getDependents();
-							ConflictedWord cw = (ConflictedWord)dp;
-							System.out.println(cw.getOriginalWord());
-							/*for(TaggedWord cw : dependentsDp)
-							{
-								System.out.println(cw.getOriginalWord());
-							}*/
-									
-				//			dp.getDependents();
-							 
-							/*if(dependentsDp.size() > 0)
-							{
-								System.out.println( "\t\t" + "[의존사]");
-								
-								 for(TaggedWord dp2 : dependentsDp )
-								 {
-									 System.out.print( dp2.getOriginalWord());
-									 System.out.print(" : ");
-									 System.out.print(dp2.getTag());
-									 System.out.print(" : ");
-									 System.out.print(dp2.getRawTag());
-									 System.out.println();
-								}
-							 }*/
-						}
-				//	}
-					System.out.println("====");
-				}
-			}
-
-		}
-		catch(Exception e)
-		{
-			e.getStackTrace();
-		}
-		
-	}
-
-	public void extractKeyword()
-	{
-		for(int i=0; i< classfier.size(); i++)
-		{
-			ArrayList<Word> wordList = classfier.get(i);
-			
-			for(int j=0; j<wordList.size(); j++)
-			{
-				Word word = wordList.get(j);
-				ArrayList<Morph> morphList = word.getMorphList();
-				for(int k = 0; k< morphList.size(); k++)
-				{
-					Morph mh = morphList.get(k);
-				//	if()
-					
-				}
-			}
-		}
-	}
 }

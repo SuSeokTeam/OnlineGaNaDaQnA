@@ -21,7 +21,7 @@ public class CQADB {
 		try {
 			String driverName = "com.mysql.jdbc.Driver";
 			System.out.println(Class.forName(driverName));
-			String url = "jdbc:mysql://202.31.202.199:3306/" + dbName;
+			String url = "jdbc:mysql://202.31.202.199:3306/" + dbName + "?useUnicode=true&characterEncoding=utf8" ;
 	//		String url = "jdbc:mysql://localhost:3307/" + dbName;
 			String id = "root";
 			String password = "kle445";
@@ -56,6 +56,102 @@ public class CQADB {
 		
 		return cqaList;
 	}
+	public void insertKeyword(String keyword)
+	{
+		try
+		{
+			String sql = "insert into keyword values('" + keyword + "' , '" + 1 + "', 'Q')";
+			st.executeUpdate(sql);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	public boolean findDependent(String keyword, int cqaNum)
+	{
+
+		try
+		{
+			String sql = "select * from dependent where keyword ='" + keyword + "' and cqaNum = '" + cqaNum  + "'";
+			rs = st.executeQuery(sql);
+			if(rs.next())
+			{
+				return true;
+			}
+		
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+		return false;
+	}
 	
+	public void insertDependent(String keyword, int cqaNum)
+	{
+		try
+		{
+			
+			String sql = "insert into dependent values('" + keyword + "', '" + cqaNum +"')";
+			st.executeUpdate(sql);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	
+	public int selectTF(String keyword)
+	{
+		int tf  = 0;
+		try
+		{
+			tf  = 0;
+			String sql = "select * from keyword where keyword ='" + keyword + "'";
+			rs = st.executeQuery(sql);
+			while(rs.next())
+			{
+				tf = rs.getInt("tf");
+			}
+		
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+		return tf;
+	}
+	public void updateTF(String keyword, int tf)
+	{
+		try
+		{
+			String sql = "update keyword set tf = '"+ tf + "' where keyword ='" + keyword + "'";
+			st.executeUpdate(sql);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	
+	public boolean findKeyword(String keyword)
+	{
+		try
+		{
+			String sql = "select * from keyword where keyword ='" + keyword + "'";
+			rs = st.executeQuery(sql);
+			if(rs.next())
+			{
+				return true;
+			}
+		
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+		return false;
+	}
 }
 

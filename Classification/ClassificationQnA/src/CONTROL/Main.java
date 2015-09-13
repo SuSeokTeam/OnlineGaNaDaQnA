@@ -8,8 +8,11 @@ public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-	//	CQADB cqadb = new CQADB("cqa");
-	//	ArrayList<QA> qaList = cqadb.selectCQA();
+		CQADB cqadb = new CQADB("cqa");
+		
+	//	cqadb.insertKeyword("전석종 바보");
+		
+		ArrayList<QA> qaList = cqadb.selectCQA();
 		//Hannanum hn = new Hannanum();
 	//	Classifier cf = new Classifier();
 		
@@ -18,46 +21,17 @@ public class Main {
 			cf.parseJosa();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		//qaList.size() 
-			for(int i=0 ; i<2; i++)
-		{
+		}*/
+		int size =  qaList.size();
+		ExtractKeyword ek = new ExtractKeyword(cqadb);
+	//	String sentence  = "사전을 찾아보니 나-가다,나-오다,달-리다로 되어 있는데, 이것이 합성 동사라는 뜻인가요? 사전을 찾아서 합성 동사임을 한눈에 알 수 있는 방법이 있나요?";
+		
+		for(int i=0 ; i<size; i++){
 			QA qa = qaList.get(i);
-	//		cf.extractKeyword(qa.getQuestion(), qa.getAnswer());
-			hn.ManualWorkflowSetUp(qa.getQuestion());
-			System.out.println();
+			ek.extractKeyword(qa.getQuestion(), qa.getNum());
+
 		}
-	//	cf.extractKeyword("학창시절, 학창 시절 중 띄어쓰기는 어떤 게 맞나요?", "학창과 시절은 각각의 단어이므로, 학창 시절과 같이 띄어 적는 것이 맞습니다.");
-		
-		ExtractKeyword ek = new ExtractKeyword();
-		try {
-			ek.parseJosa();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		for(int i=0 ; i<qaList.size() ; i++)
-		{
-			QA qa = qaList.get(i);
-			System.out.println("Q : " + qa.getQuestion());
-			System.out.println("A : " + qa.getAnswer());
-			
-			System.out.println("Q : " + ek.setSpace(qa.getQuestion()));
-			System.out.println("A : " + ek.setSpace(qa.getAnswer()));
-		//	ek.splitSpace(qa.getQuestion());
-		//	ek.splitSpace( qa.getAnswer());
-			System.out.println();
-		}
-		*/
-		ExtractKeyword ek = new ExtractKeyword();
-		String sentence  = "비었음, 비었슴 중 어느 것이 맞나요?";
-//		String sentence  = "서울에 간다와 서울로 간다의 에와 로의 차이점이 뭔가요?";
-		ek.getDependent(sentence);
-		//	sentence = ek.RemoveSpace(sentence);
-	//	ek.parseKorean(sentence);
-		//System.out.println(ek.RemoveSpace(sentence));
-		
+	
 	}
 
 }
