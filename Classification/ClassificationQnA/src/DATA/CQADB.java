@@ -153,5 +153,49 @@ public class CQADB {
 		}
 		return false;
 	}
+	
+	public void insertClassify(int cqaNum, String question)
+	{
+
+		try
+		{
+			String keyword = "";
+			String sql = "select question from classify where cqanum ='" + cqaNum + "'";
+			rs = st.executeQuery(sql);
+			
+			if(rs.next())
+			{
+				keyword = rs.getString("question");
+				keyword += "#"+ question ;
+				sql = "update classify set question = '"+ keyword + "' where cqanum ='" + cqaNum + "'";
+				st.executeUpdate(sql);
+			}
+			else
+			{
+			//	keyword = rs.getString("question");
+				keyword = question;
+				sql = "insert into classify values('" + cqaNum + "', '" + keyword +"')";
+				st.executeUpdate(sql);
+			}
+			System.out.println("cqanum : " + cqaNum + " , question : " + keyword);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	
+	public void updateClassify( int cqaNum , String keyword)
+	{
+		try
+		{
+			String sql = "update classify set keyword = '"+ keyword + "' where cqanum ='" + cqaNum + "'";
+			st.executeUpdate(sql);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
 }
 

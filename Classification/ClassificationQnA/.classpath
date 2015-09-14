@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="D:/mysql-connector-java-5.1.35/mysql-connector-java-5.1.35/mysql-connector-java-5.1.35-bin.jar"/>
 	<classpathentry kind="lib" path="C:/Users/수인/Desktop/시프/KoreanAnalyzer-master/KoreanAnalyzer-master/KoreanAnalyzer-0.2.2.3-jar-with-dependencies.jar" sourcepath="C:/Users/수인/Desktop/시프/KoreanAnalyzer-master/KoreanAnalyzer-master/KoreanAnalyzer-0.2.2.3-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="C:/Users/수인/Desktop/시프/org.snu.ids.ha.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

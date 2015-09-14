@@ -1,0 +1,82 @@
+package CONTROL;
+
+import java.util.ArrayList;
+
+import kr.kaist.ir.korean.data.TaggedSentence;
+import kr.kaist.ir.korean.parser.KkokkomaParser;
+import DATA.*;
+
+public class ExtractTopic {
+
+	QADB qadb = null;
+	KkokkomaParser iParser = null;
+	
+	public ExtractTopic(String dbName)
+	{
+		qadb = new QADB(dbName);
+		iParser = new KkokkomaParser();
+	}
+	
+	public void extractTopic(String type)
+	{
+		ArrayList<QA> qaList = qadb.selectCQA();
+		
+		for(QA q : qaList)
+		{
+			splitSentece(q, type);
+		}
+	}
+
+	public void splitSentece(QA qa, String type)
+	{
+		ArrayList<String> sentenceList = new ArrayList<String>();
+		String sentence = "";
+		String nextSentence = "";
+		
+		if(type.equals("Q"))
+		{
+			sentence = qa.getQuestion();
+		}
+		else
+		{
+			sentence = qa.getAnswer();
+		}
+		sentenceList.add(sentence);
+		int id = qa.getNum();
+		for(int i=0; i< sentenceList.size(); i++)
+		{
+			sentence = sentenceList.get(i);
+			try {
+				TaggedSentence ts = iParser.dependencyOf(sentence);
+				nextSentence = ts.getOriginalString(null);
+				System.out.println(id + " : " + nextSentence +  " : " +  type );
+				if(nextSentence.equals(sentence))
+				{
+					nextSentence = sentence.substring(0, nextSentence.length());
+					sentenceList.add(nextSentence);
+					qadb.insertKeyword(id, nextSentence, i, type);
+					
+				}
+				else
+				{
+					
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	public void getDepedent(TaggedSentence ts)
+	{
+		
+	}
+	public void getKeyword()
+	{
+		
+	}
+
+	
+}

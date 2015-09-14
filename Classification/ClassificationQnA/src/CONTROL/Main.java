@@ -22,16 +22,20 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}*/
+		long start = System.currentTimeMillis();
 		int size =  qaList.size();
 		ExtractKeyword ek = new ExtractKeyword(cqadb);
-	//	String sentence  = "사전을 찾아보니 나-가다,나-오다,달-리다로 되어 있는데, 이것이 합성 동사라는 뜻인가요? 사전을 찾아서 합성 동사임을 한눈에 알 수 있는 방법이 있나요?";
+	//	String sentence  = "해고당하다에서 당하다의 띄어쓰기가 궁금합니다.?";
 		
 		for(int i=0 ; i<size; i++){
 			QA qa = qaList.get(i);
 			ek.extractKeyword(qa.getQuestion(), qa.getNum());
-
+	//	ek.extractKeyword(sentence,0);
 		}
-	
+		long end = System.currentTimeMillis();
+
+		System.out.println( "실행 시간 : " + ( end - start )/1000.0 ); 
+
 	}
 
 }

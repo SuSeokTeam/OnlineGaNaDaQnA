@@ -1,0 +1,169 @@
+package CONTROL;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Stack;
+
+import kr.kaist.ir.korean.data.TaggedSentence;
+import kr.kaist.ir.korean.data.TaggedWord;
+import kr.kaist.ir.korean.parser.KkokkomaParser;
+import DATA.*;
+
+public class ExtractTopic {
+
+	QADB qadb = null;
+	KkokkomaParser iParser = null;
+
+
+	public ExtractTopic(String dbName)
+	{
+		qadb = new QADB(dbName);
+		iParser = new KkokkomaParser();
+	}
+	
+	public void extractTopic(String type)
+	{
+		ArrayList<QA> qaList = qadb.selectCQA();
+		
+		for(int i=0; i<qaList.size(); i++)
+		{
+			QA q = qaList.get(i);
+			splitSentece(q, type);
+		}
+	}
+
+	public void splitSentece(QA qa, String type)
+	{
+		ArrayList<String> sentenceList = new ArrayList<String>();
+		String sentence = "";
+		String nextSentence = "";
+		
+		if(type.equals("Q"))
+		{
+			sentence = qa.getQuestion();
+		}
+		else
+		{
+			sentence = qa.getAnswer();
+		}
+		sentenceList.add(sentence);
+		int id = qa.getNum();
+		int index = -1;
+		for(int i=0; i< sentenceList.size(); i++)
+		{
+			sentence = sentenceList.get(i);
+			try {
+				if(sentence.length()> 0)
+				{
+					System.out.println("======== SentenceSplit ========");
+					TaggedSentence ts = iParser.dependencyOf(sentence);
+					
+					nextSentence = ts.getOriginalString(null);
+					System.out.println(id +" : " + i +  " : " + nextSentence+ " : " +   type );
+		//			System.out.println(ts.toString());
+					getDepedent(id, i,ts, type);
+					
+					index = getIndex(sentence, nextSentence);
+					if(index < sentence.length())
+					{
+						nextSentence = sentence.substring(index);
+						sentenceList.add(nextSentence);
+					}
+				}
+			
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	public int getIndex(String sentence, String splitSentence)
+	{
+		int j =0; 
+		int i =0;
+		char a  = ' ';
+		char b = ' ';
+		while(true)
+		{
+			if(sentence.length() <= i | splitSentence.length() <= j)
+				break;
+			a = sentence.charAt(i);
+			b = splitSentence.charAt(j);
+			if(a == ' ')
+			{
+				i++;
+				if(sentence.length() <= i)
+					break;
+				a = sentence.charAt(i);
+			}
+			if(b == ' ')
+			{
+				j++;
+				if(splitSentence.length() <= j)
+					break;
+				b = splitSentence.charAt(j);
+			}
+			
+			if( a == b)
+			{
+				i++;
+				j++;
+			}
+			else
+			{
+				break;
+			}
+		}
+		return i;
+	}
+	
+	public void getDepedent(int id, int index, TaggedSentence ts, String type)
+	{
+		ArrayList<String> depList = new ArrayList<String>();
+		ArrayList<TaggedWord> tagList = new ArrayList<TaggedWord>();
+		String dep = "";
+		Queue<TaggedWord> taggedQueue = new LinkedList<TaggedWord>();
+	//	System.out.println(ts.toString());
+		System.out.println("======== Classfy ========");
+		
+//		String connectionArray[] = {"의존 연결", "대등 연결", "보조 연결"};
+		int j=0; 
+		for(int i=0 ;i< ts.size(); i++)
+		{
+			TaggedWord current = ts.getWordAt(i);
+			taggedQueue.add(current);
+		
+			if(current.getRawTag() != null )
+			{
+				if(current.getRawTag().equals("의존 연결") || current.getRawTag().equals("대등 연결") || current.getRawTag().equals("보조 연결") )
+				{
+					while(true)
+					{
+						if(taggedQueue.isEmpty())
+							break;
+						TaggedWord next =  taggedQueue.poll();
+						dep += next.getOriginalWord().toString() + " ";
+					}
+					System.out.println(id + " : " + j + " : " + dep + " : " + type);
+					depList.add(dep);
+					dep =  "";
+					j++;
+				}
+			}
+			
+		}
+		
+	}
+	
+	
+	public void getKeyword(int id, int sentenceId, int classId, String sentence, String type)
+	{
+		
+	}
+
+	
+}

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Stack;
 
 import javax.security.auth.login.Configuration;
@@ -27,6 +28,7 @@ public class ExtractKeyword {
 	ArrayList<ArrayList<TaggedWord>> classfier = new ArrayList<ArrayList<TaggedWord>>();
 	ArrayList<String> josaList = new ArrayList<String>();
 	ArrayList<TaggedMorpheme> keyword = new ArrayList<TaggedMorpheme>();
+	ArrayList<String> keywordArray =null;
 	CQADB cqadb = null;
 //	ArrayList<String> sentenceList = new ArrayList<String>();
 	KkokkomaParser iParser;
@@ -184,7 +186,7 @@ public class ExtractKeyword {
 	
 		ArrayList<String> sentenList = new ArrayList<String>();
 		sentenList.add(sentence);
-		
+		int index = 0;
 		try
 		{
 			String nextSentence = null;
@@ -201,7 +203,6 @@ public class ExtractKeyword {
 				{
 					TaggedWord w = s.getWordAt(j);
 					System.out.print(w.getOriginalWord() + " : " );
-					
 					
 					LinkedList<TaggedWord> listWord= w.getDependents();
 					
@@ -228,34 +229,29 @@ public class ExtractKeyword {
 				}
 				
 				String lastWord = s.getOriginalString(null);
-				
-				int index = -1;
+//				cqadb.insertClassify(cqaNum, lastWord);
+		//		keyword(lastWord);
 				
 				if(!nextSentence.equals(lastWord))
 				{
-					index = nextSentence.indexOf(lastWord);
-					index += lastWord.length();
+				//	index = nextSentence.lastIndexOf(lastWord);
+					index = lastWord.length()-1;
 					
-					if(index+1 <= nextSentence.length())
+					if(index < nextSentence.length())
 					{
-						String newString = nextSentence.substring(index+1, nextSentence.length());
+						String newString = nextSentence.substring(index, nextSentence.length());
 						sentenList.add(newString);
-						try {
-						      Thread.sleep(1 * 300);
-						    } catch (InterruptedException e) {
-						    	
-						    }
-							
 					}
 					
 				}
 				System.out.println();
 			}
 			printClassfiy();
-			getKeyword();
-			clear();
-			printKeyword();
-			insertDB(cqaNum);
+			attachKeyword();
+		//	getKeyword();
+		//	clear();
+		//	printKeyword();
+		//	insertDB(cqaNum);
 		}
 		catch(Exception e)
 		{
@@ -296,6 +292,69 @@ public class ExtractKeyword {
 		
 	}
 	
+	public void attachKeyword()
+	{
+		Queue<TaggedMorpheme> taggedMorphQueue = new LinkedList<TaggedMorpheme>();
+		Queue<TaggedWord> tagedQueue = new LinkedList<TaggedWord>();
+//		Stack<TaggedWord> tagedStack = new Stack<TaggedWord>();
+//		Stack<TaggedMorpheme> tagedMorphStack = new Stack<TaggedMorpheme>();
+		keywordArray =  new ArrayList<String>();
+		String tmp2 = "";
+		boolean check = false;
+		int index = 0;
+		for(ArrayList<TaggedWord> twList : classfier)
+		{
+		//	System.out.print("class " + i + " : ");
+			for(int i=0 ;i< twList.size(); i++)
+			{
+				TaggedWord t = twList.get(i);
+				//System.out.println(t.getOriginalWord());
+				
+				for(int j=0; j<t.size(); j++)
+				{
+					TaggedMorpheme tm = t.getMorphemeAt(j);
+			//		System.out.println(tm.getMorpheme().toString());
+					System.out.println(tm.toString());
+					
+					if(tm.getTag().charAt(0)== 'J')
+					{
+						check = true;
+						
+						for(;;)
+						{
+							if(tagedQueue.isEmpty())
+								break;
+							TaggedWord tmp = tagedQueue.poll();
+							tmp2 += tmp.getOriginalWord() + " ";
+					//		keywordArray.add(tmp.getOriginalWord());
+						}
+						for(;;)
+						{
+							if(taggedMorphQueue.isEmpty())
+								break;
+							TaggedMorpheme tm2 =  taggedMorphQueue.poll();
+							tmp2 += tm2.getMorpheme().toString();
+
+						}
+					}
+					else
+						taggedMorphQueue.add(tm);
+				}
+				if(!check)
+				{
+					taggedMorphQueue.clear();
+					tagedQueue.add(t);
+				}
+				check = false;
+			}
+			tagedQueue.clear();
+//			tagedQueue.removeAllElements();
+		//	System.out.println();
+		//	i++;
+		}
+		keywordArray.add(tmp2);
+	}
+	
 	public void getKeyword()
 	{
 		Stack<TaggedMorpheme> tagedStack = new Stack<TaggedMorpheme>();
@@ -312,8 +371,8 @@ public class ExtractKeyword {
 				for(int j=0; j<t.size(); j++)
 				{
 					TaggedMorpheme tm = t.getMorphemeAt(j);
-				//	System.out.println(tm.getMorpheme());
-					
+			//		System.out.println(tm.getMorpheme().toString());
+					System.out.println(tm.toString());
 					
 					if(tm.getTag().charAt(0)== 'J')
 					{
@@ -413,7 +472,7 @@ public class ExtractKeyword {
 				{
 				//	sentence.las
 					lastIndex = sentence.lastIndexOf(lastSentence);
-					lastIndex += lastSentence.length();
+				//	lastIndex += lastSentence.length();
 					
 					if(lastIndex != -1 && nextSentence.length() >= lastIndex)
 					{

@@ -1,0 +1,42 @@
+package CONTROL;
+
+import java.util.ArrayList;
+
+import DATA.*;
+
+public class ExtractTopic {
+
+	QADB qadb = null;
+	
+	public ExtractTopic(String dbName)
+	{
+		qadb = new QADB(dbName);
+	}
+	
+	public void extractTopic()
+	{
+		ArrayList<QA> qaList = qadb.selectCQA();
+		
+		for(QA q : qaList)
+		{
+			splitSentece(q, "Q");
+		}
+	}
+
+	public void splitSentece(QA qa, String type)
+	{
+		ArrayList<String> sentenceList = new ArrayList<String>();
+		sentenceList.add(e)
+	}
+	
+	public void getDepedent()
+	{
+		
+	}
+	public void getKeyword()
+	{
+		
+	}
+
+	
+}
