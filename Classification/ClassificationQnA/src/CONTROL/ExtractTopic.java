@@ -1,5 +1,8 @@
 package CONTROL;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,12 +20,23 @@ public class ExtractTopic {
 	QADB qadb = null;
 	KkokkomaParser iParser = null;
 	ArrayList<String> keywordList = null;
-
+	//FileWriter fw = null;
+	BufferedWriter bw  = null;
+	
 	public ExtractTopic(String dbName)
 	{
 		qadb = new QADB(dbName);
 		iParser = new KkokkomaParser();
 		keywordList = new ArrayList<String>();
+		try
+		{
+			FileWriter fw = new FileWriter("print.txt");
+			bw = new BufferedWriter(fw);
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
 	}
 	
 	public void extractTopic(String type)
@@ -33,10 +47,36 @@ public class ExtractTopic {
 		for(int i=0; i<qaList.size(); i++)
 		{
 			QA q = qaList.get(i);
+			System.out.println(q.getNum()+ " : " + i );
+			writeFile(q.getNum()+ " : " + i );
 			splitSentece(q, type);
 		}
 	}
 
+	public void writeFile(String msg)
+	{
+		try
+		{
+			bw.write(msg);
+			bw.newLine();
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	public void closeFile()
+	{
+		try
+		{
+			bw.close();
+		}
+		catch(Exception e)
+		{
+			e.getStackTrace();
+		}
+	}
+	
 	public void splitSentece(QA qa, String type)
 	{
 		ArrayList<String> sentenceList = new ArrayList<String>();
@@ -61,10 +101,12 @@ public class ExtractTopic {
 				if(sentence.length()> 0)
 				{
 					System.out.println("======== SentenceSplit ========");
+					writeFile("======== SentenceSplit ========");
 					TaggedSentence ts = iParser.dependencyOf(sentence);
 					
 					nextSentence = ts.getOriginalString(null);
 					System.out.println(id +" : " + i +  " : " + nextSentence+ " : " +   type );
+					writeFile(id +" : " + i +  " : " + nextSentence+ " : " +   type );
 					qadb.insertSentence(id, nextSentence, i, type);
 		//			System.out.println(ts.toString());
 					getDepedent(id, i,ts, type);
@@ -107,29 +149,36 @@ public class ExtractTopic {
 				break;
 			a = sentence.charAt(i);
 			b = splitSentence.charAt(j);
-			if(a == ' ')
+			while(true)
 			{
-				i++;
-				if(sentence.length() <= i)
+				if(a == ' ' || a == '\t')
+				{
+					i++;
+					if(sentence.length() <= i)
+						break;
+					a = sentence.charAt(i);
+				}
+				else
 					break;
-				a = sentence.charAt(i);
 			}
-			if(b == ' ')
+			while(true)
 			{
-				j++;
-				if(splitSentence.length() <= j)
+				if(b == ' ' || b == '\t')
+				{
+					j++;
+					if(splitSentence.length() <= j)
+						break;
+					b = splitSentence.charAt(j);
+				}
+				else
 					break;
-				b = splitSentence.charAt(j);
 			}
+			
 			
 			if( a == b)
 			{
 				i++;
 				j++;
-			}
-			else if(a == ' ' || b == ' ')
-			{
-				continue;
 			}
 			else
 			{
@@ -158,6 +207,7 @@ public class ExtractTopic {
 				if(current.getRawTag().equals("의존 연결") || current.getRawTag().equals("대등 연결") || current.getRawTag().equals("보조 연결") )
 				{
 					System.out.println("======== Classfy ========");
+					writeFile("======== Classfy ========");
 					while(true)
 					{
 						if(taggedQueue.isEmpty())
@@ -167,6 +217,7 @@ public class ExtractTopic {
 						tagList.add(next);
 					}
 					System.out.println(id + " : " + index + " : " + j + " : " + dep + " : " + type);
+					writeFile(id + " : " + index + " : " + j + " : " + dep + " : " + type);
 					qadb.insertDepandent(id, dep, index,  j, type);
 					getKeyword(id, index, j, dep, type, tagList);
 					
@@ -186,7 +237,9 @@ public class ExtractTopic {
 			tagList.add(next);
 		}
 		System.out.println("======== Classfy ========");
+		writeFile("======== Classfy ========");
 		System.out.println(id + " : " + index + " : " + j + " : " + dep + " : " + type);
+		writeFile(id + " : " + index + " : " + j + " : " + dep + " : " + type);
 		qadb.insertDepandent(id, dep, index,  j, type);
 		getKeyword(id, index, j, dep, type, tagList);
 		
@@ -199,6 +252,7 @@ public class ExtractTopic {
 	public void getKeyword(int id, int sentenceId, int classId, String sentence, String type, ArrayList<TaggedWord> tagList)
 	{
 		System.out.println("======== keyword ========");
+		writeFile("======== keyword ========");
 		Queue<TaggedWord> taggedQueue = new LinkedList<TaggedWord>();
 		boolean check = false;
 		String dep  = "";
@@ -231,6 +285,7 @@ public class ExtractTopic {
 					}
 					dep += " ";
 					System.out.println(id + " : " + sentenceId + " : " + classId + " : " + dep + " : " + type);
+					writeFile(id + " : " + sentenceId + " : " + classId + " : " + dep + " : " + type);
 					qadb.insertKeyword(id, sentenceId, classId, dep, type);
 					qadb.insertTFKeyword(id, dep, type);
 					if(!keywordList.contains(dep))
